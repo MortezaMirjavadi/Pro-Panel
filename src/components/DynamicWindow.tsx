@@ -49,7 +49,7 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
 
   /** Pop out window into a new browser tab */
   const handlePopOut = useCallback(() => {
-    const url = `/popout/${win.componentName}`;
+    const url = `/popout.html?component=${encodeURIComponent(win.componentName)}`;
     window.open(url, "_blank");
     closeWindow(win.id);
     toast.success(`پنجره "${win.title}" در تب جدید باز شد`);

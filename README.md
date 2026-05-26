@@ -92,7 +92,7 @@ A toggle button on the taskbar (🖥️ دسکتاپ) minimizes all windows at o
 
 ### Pop-out Window (Multi-monitor)
 
-Each window header includes a pop-out button (↗). Clicking it opens the component in a real browser tab via `window.open('/popout/:componentName', '_blank')`, closes the floating window, and shows a toast notification.
+Each window header includes a pop-out button (↗). Clicking it opens the component in a real browser tab via `window.open('/popout.html?component=ComponentName', '_blank')`, closes the floating window, and shows a toast notification. The popout page is a standalone entry point (`src/popout.tsx`) that reads the component name from URL params and renders it directly with lazy loading.
 
 ### Workspace Persistence (Zustand persist)
 
@@ -173,6 +173,7 @@ Each window is a self-contained React component with realistic UI.
 ```
 pro-panel/
 ├── index.html                     # RTL HTML shell
+├── popout.html                    # Popout window HTML shell
 ├── package.json
 ├── vite.config.ts                 # Vite + path aliases
 ├── tailwind.config.ts             # Custom desktop color palette
@@ -180,6 +181,7 @@ pro-panel/
 ├── tsconfig.json
 └── src/
     ├── main.tsx                   # React entry point
+    ├── popout.tsx                 # Popout window entry point (reads ?component= from URL)
     ├── App.tsx                    # Root layout (sidebar + desktop + taskbar + palette)
     ├── vite-env.d.ts
     ├── styles/
