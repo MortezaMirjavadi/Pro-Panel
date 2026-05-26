@@ -2,28 +2,161 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar for the desktop theme */
+/* ── Theme CSS Variables (default: midnight) ── */
+[data-theme="midnight"] {
+  --color-bg: #1a1b2e;
+  --color-surface: #252641;
+  --color-border: #363858;
+  --color-accent: #6c5ce7;
+  --color-accent-hover: #7c6df7;
+  --color-taskbar: #1e1f36;
+  --color-sidebar: #20213a;
+  --color-text: #e4e6f0;
+  --color-text-muted: #8b8da8;
+  --color-scrollbar-thumb: #363858;
+  --color-scrollbar-thumb-hover: #6c5ce7;
+  --color-cmdk-bg: #252641;
+  --color-cmdk-border: #363858;
+  --color-cmdk-selected: #6c5ce7;
+  --color-cmdk-hover: #363858;
+  --color-dot-grid: #6c5ce7;
+  --color-toast-bg: #252641;
+  --color-toast-text: #e4e6f0;
+  --color-toast-border: #363858;
+}
+
+[data-theme="ocean"] {
+  --color-bg: #0c1929;
+  --color-surface: #132f4c;
+  --color-border: #1e4976;
+  --color-accent: #0984e3;
+  --color-accent-hover: #3498db;
+  --color-taskbar: #0a1f33;
+  --color-sidebar: #0f2844;
+  --color-text: #e3f2fd;
+  --color-text-muted: #7eb8da;
+  --color-scrollbar-thumb: #1e4976;
+  --color-scrollbar-thumb-hover: #0984e3;
+  --color-cmdk-bg: #132f4c;
+  --color-cmdk-border: #1e4976;
+  --color-cmdk-selected: #0984e3;
+  --color-cmdk-hover: #1e4976;
+  --color-dot-grid: #0984e3;
+  --color-toast-bg: #132f4c;
+  --color-toast-text: #e3f2fd;
+  --color-toast-border: #1e4976;
+}
+
+[data-theme="forest"] {
+  --color-bg: #0d1f17;
+  --color-surface: #163d2e;
+  --color-border: #1e5c43;
+  --color-accent: #00b894;
+  --color-accent-hover: #55efc4;
+  --color-taskbar: #0b1a13;
+  --color-sidebar: #112e22;
+  --color-text: #d8f3dc;
+  --color-text-muted: #7db89c;
+  --color-scrollbar-thumb: #1e5c43;
+  --color-scrollbar-thumb-hover: #00b894;
+  --color-cmdk-bg: #163d2e;
+  --color-cmdk-border: #1e5c43;
+  --color-cmdk-selected: #00b894;
+  --color-cmdk-hover: #1e5c43;
+  --color-dot-grid: #00b894;
+  --color-toast-bg: #163d2e;
+  --color-toast-text: #d8f3dc;
+  --color-toast-border: #1e5c43;
+}
+
+[data-theme="sunset"] {
+  --color-bg: #1f1210;
+  --color-surface: #3d221a;
+  --color-border: #5c3528;
+  --color-accent: #e17055;
+  --color-accent-hover: #fab1a0;
+  --color-taskbar: #1a0f0d;
+  --color-sidebar: #2d1a14;
+  --color-text: #fde8e0;
+  --color-text-muted: #c49380;
+  --color-scrollbar-thumb: #5c3528;
+  --color-scrollbar-thumb-hover: #e17055;
+  --color-cmdk-bg: #3d221a;
+  --color-cmdk-border: #5c3528;
+  --color-cmdk-selected: #e17055;
+  --color-cmdk-hover: #5c3528;
+  --color-dot-grid: #e17055;
+  --color-toast-bg: #3d221a;
+  --color-toast-text: #fde8e0;
+  --color-toast-border: #5c3528;
+}
+
+[data-theme="rose"] {
+  --color-bg: #1c0f18;
+  --color-surface: #3a1d32;
+  --color-border: #5a2d4e;
+  --color-accent: #e84393;
+  --color-accent-hover: #fd79a8;
+  --color-taskbar: #170c14;
+  --color-sidebar: #2b1524;
+  --color-text: #fce4ec;
+  --color-text-muted: #c07b9a;
+  --color-scrollbar-thumb: #5a2d4e;
+  --color-scrollbar-thumb-hover: #e84393;
+  --color-cmdk-bg: #3a1d32;
+  --color-cmdk-border: #5a2d4e;
+  --color-cmdk-selected: #e84393;
+  --color-cmdk-hover: #5a2d4e;
+  --color-dot-grid: #e84393;
+  --color-toast-bg: #3a1d32;
+  --color-toast-text: #fce4ec;
+  --color-toast-border: #5a2d4e;
+}
+
+[data-theme="arctic"] {
+  --color-bg: #e8ecf1;
+  --color-surface: #ffffff;
+  --color-border: #bfc9d9;
+  --color-accent: #0077b6;
+  --color-accent-hover: #005f8a;
+  --color-taskbar: #dde3eb;
+  --color-sidebar: #f0f3f7;
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-scrollbar-thumb: #b0bac9;
+  --color-scrollbar-thumb-hover: #0077b6;
+  --color-cmdk-bg: #ffffff;
+  --color-cmdk-border: #bfc9d9;
+  --color-cmdk-selected: #0077b6;
+  --color-cmdk-hover: #dde3eb;
+  --color-dot-grid: #94a3b8;
+  --color-toast-bg: #ffffff;
+  --color-toast-text: #0f172a;
+  --color-toast-border: #bfc9d9;
+}
+
+/* ── Custom scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #252641;
+  background: var(--color-surface);
 }
 ::-webkit-scrollbar-thumb {
-  background: #363858;
+  background: var(--color-scrollbar-thumb);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #6c5ce7;
+  background: var(--color-scrollbar-thumb-hover);
 }
 
-/* cmdk overrides */
+/* ── cmdk overrides ── */
 [cmdk-root] {
   width: 100%;
   max-width: 560px;
-  background: #252641;
-  border: 1px solid #363858;
+  background: var(--color-cmdk-bg);
+  border: 1px solid var(--color-cmdk-border);
   border-radius: 12px;
   overflow: hidden;
 }
@@ -33,15 +166,15 @@
   padding: 14px 16px;
   background: transparent;
   border: none;
-  border-bottom: 1px solid #363858;
-  color: #e4e6f0;
+  border-bottom: 1px solid var(--color-cmdk-border);
+  color: var(--color-text);
   font-size: 15px;
   outline: none;
   direction: rtl;
 }
 
 [cmdk-input]::placeholder {
-  color: #8b8da8;
+  color: var(--color-text-muted);
 }
 
 [cmdk-list] {
@@ -57,30 +190,30 @@
   padding: 10px 12px;
   border-radius: 8px;
   cursor: pointer;
-  color: #e4e6f0;
+  color: var(--color-text);
   font-size: 14px;
   direction: rtl;
 }
 
 [cmdk-item][data-selected="true"] {
-  background: #6c5ce7;
+  background: var(--color-cmdk-selected);
   color: #fff;
 }
 
 [cmdk-item]:hover {
-  background: #363858;
+  background: var(--color-cmdk-hover);
 }
 
 [cmdk-empty] {
   padding: 20px;
   text-align: center;
-  color: #8b8da8;
+  color: var(--color-text-muted);
   font-size: 14px;
 }
 
 [cmdk-separator] {
   height: 1px;
-  background: #363858;
+  background: var(--color-cmdk-border);
   margin: 4px 0;
 }
 
@@ -89,11 +222,11 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #8b8da8;
+  color: var(--color-text-muted);
   direction: rtl;
 }
 
-/* Miller Columns custom scrollbar — thinner, subtle */
+/* ── Miller Columns custom scrollbar ── */
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -102,9 +235,9 @@
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #363858;
+  background: var(--color-scrollbar-thumb);
   border-radius: 3px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #6c5ce7;
+  background: var(--color-scrollbar-thumb-hover);
 }

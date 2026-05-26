@@ -11,6 +11,7 @@ import {
   XCircle,
   Monitor,
   FolderTree,
+  Palette,
 } from "lucide-react";
 import { useWindowStore } from "../store";
 import TaskbarContextMenu from "./TaskbarContextMenu";
@@ -25,6 +26,7 @@ const iconMap: Record<string, React.ElementType> = {
   Calendar,
   Terminal,
   FolderTree,
+  Palette,
 };
 
 export default function Taskbar() {

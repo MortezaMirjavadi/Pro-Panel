@@ -23,7 +23,7 @@ export default function Analytics() {
               <span className="text-sm text-desktop-text-muted">{m.label}</span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold">{m.value}</span>
+              <span className="text-2xl font-bold text-desktop-text">{m.value}</span>
               <span className={`text-sm ${m.up ? "text-green-400" : "text-red-400"}`}>
                 {m.change}
               </span>

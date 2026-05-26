@@ -59,7 +59,7 @@ export default function Messages() {
       <div className="flex-1 flex flex-col">
         <div className="p-4 border-b border-desktop-border flex items-center gap-3">
           <MessageSquare className="w-5 h-5 text-desktop-accent" />
-          <span className="font-semibold">{selectedContact.name}</span>
+          <span className="font-semibold text-desktop-text">{selectedContact.name}</span>
         </div>
 
         <div className="flex-1 p-4 overflow-auto space-y-4">

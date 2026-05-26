@@ -14,6 +14,7 @@ export const componentRegistry: Record<string, React.LazyExoticComponent<React.C
   Calendar: lazy(() => import("../windows/Calendar")),
   Terminal: lazy(() => import("../windows/Terminal")),
   AppExplorer: lazy(() => import("../explorer/AppExplorer")),
+  ThemePicker: lazy(() => import("../components/ThemePicker")),
 };
 
 /** All available window definitions for menus and command palette */
@@ -27,6 +28,7 @@ export const windowDefinitions = [
   { id: "calendar", title: "تقویم", componentName: "Calendar", icon: "Calendar" },
   { id: "terminal", title: "ترمینال", componentName: "Terminal", icon: "Terminal", allowedRoles: ["ADMIN"] },
   { id: "app-explorer", title: "کاوشگر برنامه‌ها", componentName: "AppExplorer", icon: "FolderTree" },
+  { id: "theme-picker", title: "انتخاب تم", componentName: "ThemePicker", icon: "Palette" },
 ] as const;
 
 /** Type for a window definition including optional RBAC */

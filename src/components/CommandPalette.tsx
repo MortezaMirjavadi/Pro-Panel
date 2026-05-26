@@ -13,6 +13,7 @@ import {
   AppWindow,
   Grid3x3,
   FolderTree,
+  Palette,
 } from "lucide-react";
 import { useWindowStore } from "../store";
 import { useAuthStore } from "../store/authStore";
@@ -28,6 +29,7 @@ const iconMap: Record<string, React.ElementType> = {
   Calendar,
   Terminal,
   FolderTree,
+  Palette,
 };
 
 export default function CommandPalette() {

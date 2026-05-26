@@ -37,4 +37,5 @@ export interface OpenWindowParams {
   size?: WindowSize;
 }
 
-export type ThemeMode = "dark" | "light";
+/** Theme ID — keys into the themes registry */
+export type ThemeId = string;

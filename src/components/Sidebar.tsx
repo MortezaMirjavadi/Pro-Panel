@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Search,
   FolderTree,
+  Palette,
 } from "lucide-react";
 import { useWindowStore } from "../store";
 import { windowDefinitions } from "./registry";
@@ -27,6 +28,7 @@ const iconMap: Record<string, React.ElementType> = {
   Calendar,
   Terminal,
   FolderTree,
+  Palette,
 };
 
 export default function Sidebar() {

@@ -138,17 +138,17 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
         onMouseDown={handleMouseDown}
       >
         {/* Mobile header */}
-        <div className="flex items-center justify-between px-4 h-12 shrink-0 bg-desktop-accent/90">
+        <div className="flex items-center justify-between px-4 h-12 shrink-0 bg-desktop-accent">
           <button
             onClick={() => closeWindow(win.id)}
-            className="p-2 rounded-md hover:bg-white/10 transition-colors"
+            className="p-2 rounded-md hover:bg-black/10 transition-colors text-white"
           >
-            <ArrowRight className="w-5 h-5 text-white" />
+            <ArrowRight className="w-5 h-5" />
           </button>
           <span className="text-sm font-medium text-white truncate flex-1 text-center">
             {win.title}
           </span>
-          <div className="w-9" /> {/* Spacer for centering */}
+          <div className="w-9" />
         </div>
 
         {/* Body */}
@@ -195,15 +195,15 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
       <div
         className={`flex flex-col h-full rounded-xl overflow-hidden border transition-shadow duration-200 ${
           isActive
-            ? "border-desktop-accent/60 shadow-lg shadow-desktop-accent/10"
-            : "border-desktop-border shadow-lg shadow-black/20"
+            ? "border-desktop-accent/60 shadow-xl shadow-desktop-accent/20"
+            : "border-desktop-border shadow-lg shadow-black/10"
         }`}
         onMouseDown={handleMouseDown}
       >
         {/* ── Window Title Bar (Drag Handle) ── */}
         <div
           className={`window-drag-handle flex items-center justify-between px-4 h-10 shrink-0 select-none ${
-            isActive ? "bg-desktop-accent/90" : "bg-desktop-surface"
+            isActive ? "bg-desktop-accent" : "bg-desktop-surface border-b border-desktop-border"
           }`}
           onDoubleClick={handleMaximizeToggle}
         >
@@ -214,35 +214,45 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
           <div className="flex items-center gap-1" dir="ltr">
             <button
               onClick={(e) => { e.stopPropagation(); handlePopOut(); }}
-              className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
+              className={`p-1.5 rounded-md transition-colors ${
+                isActive ? "hover:bg-black/10 text-white/90" : "hover:bg-desktop-border/50 text-desktop-text-muted"
+              }`}
               title="باز کردن در تب جدید"
             >
-              <ExternalLink className="w-3.5 h-3.5 text-white/80" />
+              <ExternalLink className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); minimizeWindow(win.id); }}
-              className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
+              className={`p-1.5 rounded-md transition-colors ${
+                isActive ? "hover:bg-black/10 text-white/90" : "hover:bg-desktop-border/50 text-desktop-text-muted"
+              }`}
               title="Minimize"
             >
-              <Minus className="w-3.5 h-3.5 text-white/80" />
+              <Minus className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); handleMaximizeToggle(); }}
-              className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
+              className={`p-1.5 rounded-md transition-colors ${
+                isActive ? "hover:bg-black/10 text-white/90" : "hover:bg-desktop-border/50 text-desktop-text-muted"
+              }`}
               title={win.isMaximized ? "Restore" : "Maximize"}
             >
               {win.isMaximized ? (
-                <Copy className="w-3.5 h-3.5 text-white/80" />
+                <Copy className="w-3.5 h-3.5" />
               ) : (
-                <Square className="w-3.5 h-3.5 text-white/80" />
+                <Square className="w-3.5 h-3.5" />
               )}
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); closeWindow(win.id); }}
-              className="p-1.5 rounded-md hover:bg-red-500 transition-colors"
+              className={`p-1.5 rounded-md transition-colors ${
+                isActive
+                  ? "hover:bg-red-500 text-white/90"
+                  : "hover:bg-red-500/20 text-red-400"
+              }`}
               title="Close"
             >
-              <X className="w-3.5 h-3.5 text-white/80" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

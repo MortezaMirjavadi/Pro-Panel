@@ -73,7 +73,7 @@ export default function Dashboard() {
             </div>
             <div>
               <p className="text-desktop-text-muted text-sm">{stat.label}</p>
-              <p className="text-lg font-bold">{stat.value}</p>
+              <p className="text-lg font-bold text-desktop-text">{stat.value}</p>
             </div>
           </div>
         ))}

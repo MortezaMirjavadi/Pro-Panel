@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { WindowType, OpenWindowParams, WindowPosition, WindowSize, ThemeMode } from "./types";
+import type { WindowType, OpenWindowParams, WindowPosition, WindowSize } from "./types";
 
 /** Default window size */
 const DEFAULT_SIZE: WindowSize = { width: 800, height: 500 };
@@ -19,8 +19,8 @@ interface WindowStore {
   isPaletteOpen: boolean;
   /** Whether all windows are minimized (Show Desktop mode) */
   showDesktop: boolean;
-  /** Theme mode: dark or light */
-  theme: ThemeMode;
+  /** Theme ID (key into themes registry) */
+  theme: string;
   /** Custom wallpaper URL (empty string = default grid pattern) */
   wallpaper: string;
   /** Pinned/favorite app IDs (persisted) */
@@ -41,7 +41,7 @@ interface WindowStore {
   restoreAllWindows: () => void;
   toggleShowDesktop: () => void;
   setPaletteOpen: (open: boolean) => void;
-  setTheme: (theme: ThemeMode) => void;
+  setTheme: (themeId: string) => void;
   setWallpaper: (url: string) => void;
   togglePin: (appId: string) => void;
 }
@@ -62,7 +62,7 @@ export const useWindowStore = create<WindowStore>()(
       activeWindowId: null,
       isPaletteOpen: false,
       showDesktop: false,
-      theme: "dark",
+      theme: "midnight",
       wallpaper: "",
       pinnedApps: [],
 
@@ -251,8 +251,8 @@ export const useWindowStore = create<WindowStore>()(
         set({ isPaletteOpen: open });
       },
 
-      setTheme: (theme: ThemeMode) => {
-        set({ theme });
+      setTheme: (themeId: string) => {
+        set({ theme: themeId });
       },
 
       setWallpaper: (url: string) => {

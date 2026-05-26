@@ -16,9 +16,8 @@ export default function App() {
   return (
     <div
       dir="rtl"
-      className={`h-screen w-screen flex flex-col overflow-hidden select-none ${
-        theme === "dark" ? "bg-desktop-bg text-desktop-text" : "bg-gray-100 text-gray-900"
-      }`}
+      data-theme={theme}
+      className="h-screen w-screen flex flex-col overflow-hidden select-none bg-desktop-bg text-desktop-text"
     >
       {/* ── Main Content Area ── */}
       <div className="flex flex-1 overflow-hidden">
@@ -28,7 +27,7 @@ export default function App() {
         {/* Desktop Area — windows render here */}
         <DesktopContextMenu>
           <main className="flex-1 relative overflow-hidden">
-          {/* Background: wallpaper or default grid (hidden on mobile when windows are open) */}
+          {/* Background: wallpaper or default dot-grid */}
           {!isMobile && (
             wallpaper ? (
               <div
@@ -37,11 +36,12 @@ export default function App() {
               />
             ) : (
               <div
-                className="absolute inset-0 opacity-[0.03]"
+                className="absolute inset-0"
                 style={{
                   backgroundImage:
-                    "radial-gradient(circle, #6c5ce7 1px, transparent 1px)",
+                    "radial-gradient(circle, var(--color-dot-grid) 1px, transparent 1px)",
                   backgroundSize: "24px 24px",
+                  opacity: 0.06,
                 }}
               />
             )
@@ -88,9 +88,9 @@ export default function App() {
         dir="rtl"
         toastOptions={{
           style: {
-            background: theme === "dark" ? "#252641" : "#fff",
-            color: theme === "dark" ? "#e4e6f0" : "#1a1a1a",
-            border: `1px solid ${theme === "dark" ? "#363858" : "#e5e7eb"}`,
+            background: "var(--color-toast-bg)",
+            color: "var(--color-toast-text)",
+            border: "1px solid var(--color-toast-border)",
             fontSize: "13px",
           },
         }}
