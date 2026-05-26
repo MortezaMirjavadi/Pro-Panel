@@ -10,11 +10,13 @@ A modern MDI (Multiple Document Interface) admin panel that simulates a desktop 
 |---|---|
 | Build Tool | Vite 6 |
 | UI Framework | React 19 + TypeScript |
-| State Management | Zustand 5 |
+| State Management | Zustand 5 (with `persist` middleware) |
 | Window Drag/Resize | react-rnd |
 | Styling | Tailwind CSS 3 |
 | Icons | Lucide React |
 | Command Palette | cmdk |
+| Keyboard Shortcuts | react-hotkeys-hook |
+| Toast Notifications | sonner |
 
 ## Features
 
@@ -30,6 +32,7 @@ The core of the application — a full MDI window manager powered by Zustand and
 - **Drag** — the title bar acts as the drag handle. Windows can be moved freely within the desktop bounds.
 - **Resize** — all window edges and corners are resizable with a minimum size of 400x300px.
 - **Duplicate prevention** — opening an already-open window focuses and un-minimizes it instead of creating a duplicate.
+- **Close All** — a "بستن همه" button on the taskbar clears all open windows in one click, resetting the desktop to its empty state.
 
 ### Sidebar (RTL)
 
@@ -60,6 +63,70 @@ A Spotlight-like search overlay for rapid window switching.
 - Selecting a result restores the window (if minimized) and focuses it.
 - Shows a "minimized" badge on windows that are hidden.
 
+### Miller Columns (App Explorer)
+
+A macOS Finder-style navigation pattern for exploring deeply nested menus (N-level).
+
+- **RTL flow** — columns scroll right-to-left. The root column is pinned to the far right; child columns open to the left.
+- **Root column** — contains a search input, a "Pinned Apps" (favorites) section, and all root-level categories.
+- **Branch navigation** — clicking a menu item with children opens a new column showing those children. A left-pointing arrow (⬅) indicates expandable items.
+- **Terminal nodes** — clicking an item with a `componentName` opens it as a floating window.
+- **Search** — the root column's search bar flattens the entire menu tree and instantly shows matching terminal apps.
+- **Favorites / Pinned Apps** — terminal items show a star icon (⭐) on hover. Clicking toggles the pin. Pinned apps appear in the root column's "علاقه‌مندی‌ها" section and are persisted in `localStorage`.
+- **Auto-scroll** — the container automatically scrolls to the newest column when navigating deeper.
+- **Custom scrollbar** — thin 5px scrollbar that fades in on hover, matching the desktop theme.
+- **4-level deep mock data** — 10 root categories with up to 4 levels of nesting (e.g. Users → Roles → Permissions → Read/Write/Admin).
+
+### Window Snapping (Windows 11 style)
+
+Dragging a window to a screen edge triggers a snap.
+
+- **Left edge** (x ≤ 20px) — window snaps to the left 50% of the desktop area.
+- **Right edge** (x ≥ parent width - window width - 20px) — window snaps to the right 50%.
+- **Pre-snap restore** — the previous dimensions are saved. Dragging the window away from the edge restores its original size.
+- **Manual resize clears snap** — resizing a snapped window resets the snap state.
+
+### Show Desktop
+
+A toggle button on the taskbar (🖥️ دسکتاپ) minimizes all windows at once. Clicking it again restores all windows to their previous state and focuses the top-most one.
+
+### Pop-out Window (Multi-monitor)
+
+Each window header includes a pop-out button (↗). Clicking it opens the component in a real browser tab via `window.open('/popout/:componentName', '_blank')`, closes the floating window, and shows a toast notification.
+
+### Workspace Persistence (Zustand persist)
+
+The Zustand store is wrapped with `persist` middleware. The following data is serialized to `localStorage`:
+
+- Window positions, sizes, z-index, minimized/maximized state
+- Active window ID
+- Theme mode and wallpaper URL
+- Pinned/favorite app IDs
+
+React components and functions are excluded from serialization via `partialize`.
+
+### Toast Notifications (sonner)
+
+Global toast notifications for user actions:
+
+- Window snapped to edge
+- Window popped out to new tab
+- Window closed/minimized via keyboard shortcut
+- Show Desktop toggled
+- Dark-themed toasts positioned at bottom-left with RTL direction.
+
+### Keyboard Shortcuts (react-hotkeys-hook)
+
+Global hotkeys that work across the entire application:
+
+| Shortcut | Action |
+|---|---|
+| `Cmd+K` / `Ctrl+K` | Toggle command palette |
+| `Alt+W` | Close the currently focused window |
+| `Alt+M` | Minimize the currently focused window |
+| `Alt+D` | Toggle Show Desktop |
+| `Escape` | Close command palette |
+
 ### RTL (Right-to-Left) Layout
 
 The entire application is built RTL-first.
@@ -74,7 +141,7 @@ The entire application is built RTL-first.
 A clean mapping pattern for registering window content.
 
 - `componentRegistry` maps string names to `React.lazy()` components.
-- Window bodies are wrapped in `<Suspense>` with a loading spinner fallback.
+- Window bodies are wrapped in `<Suspense>` with a shimmering `<WindowSkeleton />` fallback.
 - Adding a new window type requires only: (1) create the component, (2) add an entry to the registry, (3) add a definition to `windowDefinitions`.
 
 ### 8 Built-in Window Applications
@@ -91,6 +158,7 @@ Each window is a self-contained React component with realistic UI.
 | **Messages** | Split-pane chat UI with contact list, unread badges, and message bubbles |
 | **Calendar** | Monthly calendar grid with Persian day names and color-coded events |
 | **Terminal** | Interactive terminal emulator with command history (help, ls, pwd, whoami, date, echo, clear) |
+| **App Explorer** | Miller Columns (Finder-style) navigation for exploring nested menu hierarchies with search and favorites |
 
 ### Theming & Styling
 
@@ -122,10 +190,19 @@ pro-panel/
     │   └── index.ts               # Barrel export
     ├── components/
     │   ├── registry.ts            # Component registry + window definitions
-    │   ├── DynamicWindow.tsx      # react-rnd wrapper (drag, resize, focus, controls)
+    │   ├── DynamicWindow.tsx      # react-rnd wrapper (drag, resize, snap, pop-out, focus)
     │   ├── Sidebar.tsx            # Collapsible RTL navigation sidebar
-    │   ├── Taskbar.tsx            # Bottom taskbar for open windows
-    │   └── CommandPalette.tsx     # cmdk-based Cmd+K search overlay
+    │   ├── Taskbar.tsx            # Bottom taskbar (Show Desktop, Close All)
+    │   ├── CommandPalette.tsx     # cmdk overlay (Open Windows + Available Apps groups)
+    │   ├── GlobalShortcuts.tsx    # react-hotkeys-hook global keyboard shortcuts
+    │   └── WindowSkeleton.tsx     # Shimmering skeleton for Suspense fallback
+    ├── explorer/
+    │   ├── types.ts               # MenuItem recursive type + MillerColumn type
+    │   ├── menuData.ts            # 4-level deep mock menu tree + flattenTerminalItems()
+    │   ├── useMillerColumns.ts    # Hook: path state, columns derivation, search filtering
+    │   ├── MillerColumnItem.tsx   # Single item row (icon, title, pin, arrow)
+    │   ├── MillerColumn.tsx       # Column container (header + scrollable list)
+    │   └── AppExplorer.tsx        # Main Miller Columns component (root + child columns)
     └── windows/
         ├── Dashboard.tsx
         ├── Users.tsx
@@ -173,14 +250,7 @@ YourApp: lazy(() => import("../windows/YourApp")),
 { id: "your-app", title: "عنوان", componentName: "YourApp", icon: "IconName" },
 ```
 
-That's it — the sidebar, taskbar, and command palette will automatically pick it up.
-
-## Keyboard Shortcuts
-
-| Shortcut | Action |
-|---|---|
-| `Cmd+K` / `Ctrl+K` | Open command palette |
-| `Escape` | Close command palette |
+That's it — the sidebar, taskbar, command palette, and app explorer will automatically pick it up.
 
 ## License
 

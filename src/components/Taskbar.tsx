@@ -8,6 +8,9 @@ import {
   Calendar,
   Terminal,
   Minimize2,
+  XCircle,
+  Monitor,
+  FolderTree,
 } from "lucide-react";
 import { useWindowStore } from "../store";
 
@@ -20,10 +23,11 @@ const iconMap: Record<string, React.ElementType> = {
   MessageSquare,
   Calendar,
   Terminal,
+  FolderTree,
 };
 
 export default function Taskbar() {
-  const { windows, activeWindowId, focusWindow, minimizeWindow, restoreWindow } =
+  const { windows, activeWindowId, focusWindow, minimizeWindow, restoreWindow, closeAllWindows, toggleShowDesktop, showDesktop } =
     useWindowStore();
 
   const openWindows = Object.values(windows);
@@ -63,6 +67,33 @@ export default function Taskbar() {
           </button>
         );
       })}
+
+      {/* Right-side actions */}
+      <div className="mr-auto" />
+
+      {/* Show Desktop toggle */}
+      <button
+        onClick={toggleShowDesktop}
+        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+          showDesktop
+            ? "bg-desktop-accent text-white"
+            : "text-desktop-text-muted hover:bg-desktop-surface hover:text-desktop-text"
+        }`}
+        title="نمایش دسکتاپ (Alt+D)"
+      >
+        <Monitor className="w-4 h-4" />
+        <span>دسکتاپ</span>
+      </button>
+
+      {/* Close all windows */}
+      <button
+        onClick={closeAllWindows}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-desktop-text-muted hover:bg-red-500/20 hover:text-red-400 transition-colors"
+        title="بستن همه پنجره‌ها"
+      >
+        <XCircle className="w-4 h-4" />
+        <span>بستن همه</span>
+      </button>
     </div>
   );
 }

@@ -4,4 +4,5 @@ export type {
   WindowPosition,
   WindowSize,
   OpenWindowParams,
+  ThemeMode,
 } from "./types";

@@ -1,4 +1,3 @@
-import { useEffect, useCallback } from "react";
 import { Command } from "cmdk";
 import {
   LayoutDashboard,
@@ -10,8 +9,12 @@ import {
   Calendar,
   Terminal,
   X,
+  AppWindow,
+  Grid3x3,
+  FolderTree,
 } from "lucide-react";
 import { useWindowStore } from "../store";
+import { windowDefinitions } from "./registry";
 
 const iconMap: Record<string, React.ElementType> = {
   LayoutDashboard,
@@ -22,35 +25,17 @@ const iconMap: Record<string, React.ElementType> = {
   MessageSquare,
   Calendar,
   Terminal,
+  FolderTree,
 };
 
 export default function CommandPalette() {
-  const { isPaletteOpen, setPaletteOpen, windows, focusWindow, restoreWindow } =
+  const { isPaletteOpen, setPaletteOpen, windows, focusWindow, restoreWindow, openWindow } =
     useWindowStore();
 
   const openWindows = Object.values(windows);
 
-  /** Global keyboard shortcut: Cmd+K / Ctrl+K */
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setPaletteOpen(!isPaletteOpen);
-      }
-      if (e.key === "Escape" && isPaletteOpen) {
-        setPaletteOpen(false);
-      }
-    },
-    [isPaletteOpen, setPaletteOpen]
-  );
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  /** Select a window from the palette */
-  const handleSelect = (windowId: string) => {
+  /** Select an already-open window from the palette */
+  const handleSelectWindow = (windowId: string) => {
     const win = windows[windowId];
     if (!win) return;
 
@@ -58,6 +43,20 @@ export default function CommandPalette() {
       restoreWindow(windowId);
     }
     focusWindow(windowId);
+    setPaletteOpen(false);
+  };
+
+  /** Open a new window from the "Available Apps" group */
+  const handleOpenApp = (componentName: string) => {
+    const def = windowDefinitions.find((d) => d.componentName === componentName);
+    if (!def) return;
+
+    openWindow({
+      id: def.id,
+      title: def.title,
+      componentName: def.componentName,
+      icon: def.icon,
+    });
     setPaletteOpen(false);
   };
 
@@ -71,7 +70,7 @@ export default function CommandPalette() {
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[560px] mx-4">
         <Command>
           <div className="relative">
-            <Command.Input placeholder="جستجوی پنجره‌های باز..." autoFocus />
+            <Command.Input placeholder="جستجوی پنجره یا برنامه..." autoFocus />
             <button
               onClick={() => setPaletteOpen(false)}
               className="absolute left-3 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-desktop-border/50"
@@ -80,21 +79,51 @@ export default function CommandPalette() {
             </button>
           </div>
           <Command.List>
-            <Command.Empty>پنجره‌ای یافت نشد.</Command.Empty>
-            <Command.Group heading="پنجره‌های باز">
-              {openWindows.map((win) => {
-                const Icon = iconMap[win.icon ?? ""] ?? LayoutDashboard;
+            <Command.Empty>نتیجه‌ای یافت نشد.</Command.Empty>
+
+            {/* ── Group 1: Open Windows ── */}
+            {openWindows.length > 0 && (
+              <Command.Group heading="پنجره‌های باز">
+                {openWindows.map((win) => {
+                  const Icon = iconMap[win.icon ?? ""] ?? LayoutDashboard;
+                  return (
+                    <Command.Item
+                      key={`open-${win.id}`}
+                      value={`open ${win.title} ${win.componentName}`}
+                      onSelect={() => handleSelectWindow(win.id)}
+                    >
+                      <AppWindow className="w-4 h-4 text-desktop-accent" />
+                      <span className="flex-1">{win.title}</span>
+                      {win.isMinimized && (
+                        <span className="text-xs text-desktop-text-muted bg-desktop-border/50 px-2 py-0.5 rounded">
+                          حداقل شده
+                        </span>
+                      )}
+                    </Command.Item>
+                  );
+                })}
+              </Command.Group>
+            )}
+
+            <Command.Separator />
+
+            {/* ── Group 2: Available Apps ── */}
+            <Command.Group heading="برنامه‌های موجود">
+              {windowDefinitions.map((def) => {
+                const Icon = iconMap[def.icon] ?? LayoutDashboard;
+                const isOpen = !!windows[def.id];
                 return (
                   <Command.Item
-                    key={win.id}
-                    value={`${win.title} ${win.componentName}`}
-                    onSelect={() => handleSelect(win.id)}
+                    key={`app-${def.id}`}
+                    value={`app ${def.title} ${def.componentName}`}
+                    onSelect={() => handleOpenApp(def.componentName)}
                   >
+                    <Grid3x3 className="w-4 h-4 text-desktop-text-muted" />
                     <Icon className="w-4 h-4 text-desktop-accent" />
-                    <span className="flex-1">{win.title}</span>
-                    {win.isMinimized && (
-                      <span className="text-xs text-desktop-text-muted bg-desktop-border/50 px-2 py-0.5 rounded">
-                        حداقل شده
+                    <span className="flex-1">{def.title}</span>
+                    {isOpen && (
+                      <span className="text-xs text-green-400 bg-green-500/15 px-2 py-0.5 rounded">
+                        باز
                       </span>
                     )}
                   </Command.Item>

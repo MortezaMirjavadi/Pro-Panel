@@ -92,3 +92,19 @@
   color: #8b8da8;
   direction: rtl;
 }
+
+/* Miller Columns custom scrollbar — thinner, subtle */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #363858;
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #6c5ce7;
+}

@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
+  FolderTree,
 } from "lucide-react";
 import { useWindowStore } from "../store";
 import { windowDefinitions } from "./registry";
@@ -25,6 +26,7 @@ const iconMap: Record<string, React.ElementType> = {
   MessageSquare,
   Calendar,
   Terminal,
+  FolderTree,
 };
 
 export default function Sidebar() {

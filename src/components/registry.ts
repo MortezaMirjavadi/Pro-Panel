@@ -13,6 +13,7 @@ export const componentRegistry: Record<string, React.LazyExoticComponent<React.C
   Messages: lazy(() => import("../windows/Messages")),
   Calendar: lazy(() => import("../windows/Calendar")),
   Terminal: lazy(() => import("../windows/Terminal")),
+  AppExplorer: lazy(() => import("../explorer/AppExplorer")),
 };
 
 /** All available window definitions for menus and command palette */
@@ -25,4 +26,5 @@ export const windowDefinitions = [
   { id: "messages", title: "پیام‌ها", componentName: "Messages", icon: "MessageSquare" },
   { id: "calendar", title: "تقویم", componentName: "Calendar", icon: "Calendar" },
   { id: "terminal", title: "ترمینال", componentName: "Terminal", icon: "Terminal" },
+  { id: "app-explorer", title: "کاوشگر برنامه‌ها", componentName: "AppExplorer", icon: "FolderTree" },
 ] as const;

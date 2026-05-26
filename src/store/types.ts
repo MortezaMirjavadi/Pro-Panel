@@ -23,6 +23,8 @@ export interface WindowType {
   size: WindowSize;
   /** Icon component name from lucide-react (optional) */
   icon?: string;
+  /** Saved size before snapping, so we can restore on drag-away */
+  preSnapSize?: WindowSize | null;
 }
 
 /** Parameters for opening a new window */
@@ -34,3 +36,5 @@ export interface OpenWindowParams {
   position?: WindowPosition;
   size?: WindowSize;
 }
+
+export type ThemeMode = "dark" | "light";
