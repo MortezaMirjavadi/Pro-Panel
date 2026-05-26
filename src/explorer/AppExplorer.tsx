@@ -1,11 +1,11 @@
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback, useMemo } from "react";
 import { Search, Star, X, LayoutDashboard } from "lucide-react";
 import { useMillerColumns } from "./useMillerColumns";
 import { useWindowStore } from "../store";
 import MillerColumn from "./MillerColumn";
 import MillerColumnItem from "./MillerColumnItem";
 import type { MenuItem } from "./types";
-import { flattenTerminalItems, menuData } from "./menuData";
+import { flattenFilteredTerminalItems } from "../lib/rbac";
 
 export default function AppExplorer() {
   const { openWindow, pinnedApps } = useWindowStore();
@@ -20,11 +20,19 @@ export default function AppExplorer() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  /** Root-level items (already filtered by role via useMillerColumns) */
+  const rootItems = columns[0]?.items ?? [];
+
+  /** All terminal items from the filtered tree (for pinned lookup) */
+  const allFilteredTerminal = useMemo(
+    () => flattenFilteredTerminalItems(rootItems),
+    [rootItems]
+  );
+
   /** Auto-scroll to the far left (newest column) when path deepens */
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollLeft = 0; // RTL: 0 = far right (root), scroll left for new columns
-      // Scroll to the leftmost position (newest column)
+      scrollRef.current.scrollLeft = 0;
       scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
     }
   }, [columns.length]);
@@ -36,14 +44,12 @@ export default function AppExplorer() {
       if (!item) return;
 
       if (item.componentName) {
-        // Terminal node — open the window
         openWindow({
           id: item.id,
           title: item.title,
           componentName: item.componentName,
         });
       } else if (item.children && item.children.length > 0) {
-        // Branch node — navigate into it
         selectItem(columnIndex, itemId);
       }
     },
@@ -65,13 +71,9 @@ export default function AppExplorer() {
     [openWindow, setSearchQuery]
   );
 
-  /** Get pinned item objects */
+  /** Get pinned item objects (filtered by role) */
   const pinnedItems = pinnedApps
-    .map((id) => {
-      // Look up in the flattened terminal items
-      const allTerminal = flattenTerminalItems(menuData);
-      return allTerminal.find((item) => item.id === id);
-    })
+    .map((id) => allFilteredTerminal.find((item) => item.id === id))
     .filter(Boolean) as MenuItem[];
 
   return (
@@ -169,10 +171,10 @@ export default function AppExplorer() {
             </div>
           )}
 
-          {/* Root-level menu items */}
+          {/* Root-level menu items (filtered by role) */}
           {!searchQuery.trim() && (
             <div className="flex-1 overflow-y-auto custom-scrollbar">
-              {menuData.map((item) => (
+              {rootItems.map((item) => (
                 <MillerColumnItem
                   key={item.id}
                   item={item}

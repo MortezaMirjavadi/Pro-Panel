@@ -10,6 +10,12 @@ export interface MenuItem {
   componentName?: string;
   /** If present, this item has children (branch node) */
   children?: MenuItem[];
+  /**
+   * Role-based access control.
+   * If undefined or empty, the item is accessible to all roles.
+   * If set, only users with one of these roles can see/access this item.
+   */
+  allowedRoles?: string[];
 }
 
 /** A column in the Miller Columns view — represents one level of the tree */

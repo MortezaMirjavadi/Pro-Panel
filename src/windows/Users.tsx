@@ -1,5 +1,7 @@
 import { UserPlus, Search, MoreHorizontal } from "lucide-react";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useEmit } from "../lib/useEventBus";
+import { toast } from "sonner";
 
 const mockUsers = [
   { id: 1, name: "علی محمدی", email: "ali@example.com", role: "ادمین", status: "فعال" },
@@ -12,16 +14,44 @@ const mockUsers = [
 
 export default function Users() {
   const [search, setSearch] = useState("");
+  const [users, setUsers] = useState(mockUsers);
 
-  const filtered = mockUsers.filter(
+  /** Emit events to other windows */
+  const emitRefresh = useEmit("REFRESH_DATA");
+  const emitNotify = useEmit("NOTIFY");
+
+  const filtered = users.filter(
     (u) => u.name.includes(search) || u.email.includes(search)
   );
+
+  /** Simulate adding a user — then notify Dashboard and show a toast */
+  const handleAddUser = useCallback(() => {
+    const newUser = {
+      id: Date.now(),
+      name: "کاربر جدید",
+      email: `user${Date.now()}@example.com`,
+      role: "ویرایشگر",
+      status: "فعال",
+    };
+
+    setUsers((prev) => [...prev, newUser]);
+    toast.success(`کاربر "${newUser.name}" اضافه شد`);
+
+    // Tell Dashboard to refresh its stats
+    emitRefresh({ target: "dashboard" });
+
+    // Also send a notification event (other windows could listen)
+    emitNotify({ message: `کاربر جدید اضافه شد: ${newUser.name}`, type: "success" });
+  }, [emitRefresh, emitNotify]);
 
   return (
     <div className="p-6 h-full overflow-auto flex flex-col" dir="rtl">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold">مدیریت کاربران</h2>
-        <button className="flex items-center gap-2 bg-desktop-accent hover:bg-desktop-accent-hover text-white px-4 py-2 rounded-lg text-sm transition-colors">
+        <button
+          onClick={handleAddUser}
+          className="flex items-center gap-2 bg-desktop-accent hover:bg-desktop-accent-hover text-white px-4 py-2 rounded-lg text-sm transition-colors"
+        >
           <UserPlus className="w-4 h-4" />
           کاربر جدید
         </button>

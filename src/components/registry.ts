@@ -25,6 +25,9 @@ export const windowDefinitions = [
   { id: "file-manager", title: "مدیریت فایل", componentName: "FileManager", icon: "FolderOpen" },
   { id: "messages", title: "پیام‌ها", componentName: "Messages", icon: "MessageSquare" },
   { id: "calendar", title: "تقویم", componentName: "Calendar", icon: "Calendar" },
-  { id: "terminal", title: "ترمینال", componentName: "Terminal", icon: "Terminal" },
+  { id: "terminal", title: "ترمینال", componentName: "Terminal", icon: "Terminal", allowedRoles: ["ADMIN"] },
   { id: "app-explorer", title: "کاوشگر برنامه‌ها", componentName: "AppExplorer", icon: "FolderTree" },
 ] as const;
+
+/** Type for a window definition including optional RBAC */
+export type WindowDefinition = (typeof windowDefinitions)[number];

@@ -1,9 +1,12 @@
 import { Suspense, useCallback, useRef } from "react";
 import { Rnd } from "react-rnd";
-import { Minus, Square, X, Copy, ExternalLink } from "lucide-react";
+import { Minus, Square, X, Copy, ExternalLink, ArrowRight } from "lucide-react";
+import { ErrorBoundary } from "react-error-boundary";
 import { useWindowStore } from "../store";
 import { componentRegistry } from "./registry";
 import WindowSkeleton from "./WindowSkeleton";
+import WindowErrorFallback from "./WindowErrorFallback";
+import { useIsMobile } from "../lib/useIsMobile";
 import type { WindowType, WindowSize } from "../store";
 import { toast } from "sonner";
 
@@ -13,6 +16,20 @@ interface DynamicWindowProps {
 
 /** Threshold in pixels from screen edge to trigger snap */
 const SNAP_THRESHOLD = 20;
+
+/** Shared window body content (ErrorBoundary + Suspense + Component) */
+function WindowBody({ componentName }: { componentName: string }) {
+  const Component = componentRegistry[componentName];
+  if (!Component) return null;
+
+  return (
+    <ErrorBoundary FallbackComponent={WindowErrorFallback} onReset={() => {}}>
+      <Suspense fallback={<WindowSkeleton />}>
+        <Component />
+      </Suspense>
+    </ErrorBoundary>
+  );
+}
 
 export default function DynamicWindow({ window: win }: DynamicWindowProps) {
   const {
@@ -27,6 +44,7 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
     activeWindowId,
   } = useWindowStore();
 
+  const isMobile = useIsMobile();
   const isActive = activeWindowId === win.id;
   const Component = componentRegistry[win.componentName];
 
@@ -55,12 +73,7 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
     toast.success(`پنجره "${win.title}" در تب جدید باز شد`);
   }, [win.componentName, win.title, win.id, closeWindow]);
 
-  /**
-   * Window snapping logic on drag stop.
-   * - Drag to left edge (x <= SNAP_THRESHOLD) → snap left 50%
-   * - Drag to right edge (x >= parentWidth - windowWidth - SNAP_THRESHOLD) → snap right 50%
-   * - Otherwise → normal position update, restore pre-snap size if it was snapped
-   */
+  /** Window snapping logic on drag stop */
   const handleDragStop = useCallback(
     (_e: unknown, d: { x: number; y: number }) => {
       const parent = document.querySelector("main");
@@ -76,7 +89,6 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
 
       // Left edge snap
       if (d.x <= SNAP_THRESHOLD) {
-        // Save current size before snapping (only if not already snapped)
         if (preSnapSizeRef.current === null) {
           preSnapSizeRef.current = { width: currentWidth, height: win.size.height };
         }
@@ -90,7 +102,6 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
         if (preSnapSizeRef.current === null) {
           preSnapSizeRef.current = { width: currentWidth, height: win.size.height };
         }
-        // Position at the right half
         updateWindowPosition(win.id, { x: halfWidth, y: 0 });
         updateWindowSize(win.id, { width: halfWidth, height: parentHeight });
         toast.info("پنجره به لبه راست چسبید");
@@ -103,7 +114,6 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
         preSnapSizeRef.current = null;
         updateWindowPosition(win.id, { x: d.x, y: d.y });
         updateWindowSize(win.id, restored);
-        // Clear snap state in store
         updateWindowSnap(win.id, restored, null);
         return;
       }
@@ -117,6 +127,39 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
     return null;
   }
 
+  // ── Mobile: full-screen modal, no drag/resize ──
+  if (isMobile) {
+    if (win.isMinimized) return null;
+
+    return (
+      <div
+        className="fixed inset-0 z-50 flex flex-col bg-desktop-bg"
+        style={{ zIndex: win.zIndex }}
+        onMouseDown={handleMouseDown}
+      >
+        {/* Mobile header */}
+        <div className="flex items-center justify-between px-4 h-12 shrink-0 bg-desktop-accent/90">
+          <button
+            onClick={() => closeWindow(win.id)}
+            className="p-2 rounded-md hover:bg-white/10 transition-colors"
+          >
+            <ArrowRight className="w-5 h-5 text-white" />
+          </button>
+          <span className="text-sm font-medium text-white truncate flex-1 text-center">
+            {win.title}
+          </span>
+          <div className="w-9" /> {/* Spacer for centering */}
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-hidden">
+          <WindowBody componentName={win.componentName} />
+        </div>
+      </div>
+    );
+  }
+
+  // ── Desktop: draggable/resizable window via react-rnd ──
   return (
     <Rnd
       size={{
@@ -135,7 +178,6 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
       onMouseDown={handleMouseDown}
       onDragStop={handleDragStop}
       onResizeStop={(_e, _direction, ref, _delta, position) => {
-        // Clear snap state when user manually resizes
         preSnapSizeRef.current = null;
         updateWindowSize(win.id, {
           width: parseInt(ref.style.width),
@@ -165,39 +207,27 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
           }`}
           onDoubleClick={handleMaximizeToggle}
         >
-          {/* Title */}
           <span className={`text-sm font-medium truncate ${isActive ? "text-white" : "text-desktop-text-muted"}`}>
             {win.title}
           </span>
 
-          {/* Window Controls */}
           <div className="flex items-center gap-1" dir="ltr">
-            {/* Pop-out button */}
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePopOut();
-              }}
+              onClick={(e) => { e.stopPropagation(); handlePopOut(); }}
               className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
               title="باز کردن در تب جدید"
             >
               <ExternalLink className="w-3.5 h-3.5 text-white/80" />
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                minimizeWindow(win.id);
-              }}
+              onClick={(e) => { e.stopPropagation(); minimizeWindow(win.id); }}
               className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
               title="Minimize"
             >
               <Minus className="w-3.5 h-3.5 text-white/80" />
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleMaximizeToggle();
-              }}
+              onClick={(e) => { e.stopPropagation(); handleMaximizeToggle(); }}
               className="p-1.5 rounded-md hover:bg-white/10 transition-colors"
               title={win.isMaximized ? "Restore" : "Maximize"}
             >
@@ -208,10 +238,7 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
               )}
             </button>
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                closeWindow(win.id);
-              }}
+              onClick={(e) => { e.stopPropagation(); closeWindow(win.id); }}
               className="p-1.5 rounded-md hover:bg-red-500 transition-colors"
               title="Close"
             >
@@ -222,9 +249,7 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
 
         {/* ── Window Body ── */}
         <div className="flex-1 overflow-hidden bg-desktop-bg">
-          <Suspense fallback={<WindowSkeleton />}>
-            <Component />
-          </Suspense>
+          <WindowBody componentName={win.componentName} />
         </div>
       </div>
     </Rnd>

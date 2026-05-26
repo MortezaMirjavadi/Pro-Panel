@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import {
   LayoutDashboard,
   TrendingUp,
@@ -5,21 +6,59 @@ import {
   ShoppingCart,
   DollarSign,
   Activity,
+  RefreshCw,
 } from "lucide-react";
-
-const stats = [
-  { label: "کل کاربران", value: "۱۲,۴۵۸", icon: Users, color: "bg-blue-500/20 text-blue-400" },
-  { label: "فروش امروز", value: "۸,۲۳۰,۰۰۰", icon: ShoppingCart, color: "bg-green-500/20 text-green-400" },
-  { label: "درآمد ماه", value: "۱۲۵,۰۰۰,۰۰۰", icon: DollarSign, color: "bg-purple-500/20 text-purple-400" },
-  { label: "بازدید لحظه‌ای", value: "۱,۲۳۴", icon: Activity, color: "bg-orange-500/20 text-orange-400" },
-];
+import { useEventBus } from "../lib/useEventBus";
+import { toast } from "sonner";
 
 export default function Dashboard() {
+  const [userCount, setUserCount] = useState(12458);
+  const [lastRefresh, setLastRefresh] = useState<string | null>(null);
+
+  /** Listen for REFRESH_DATA events from other windows */
+  const handleRefresh = useCallback(
+    (payload: { target: string }) => {
+      if (payload.target === "dashboard") {
+        // Simulate updating the user count
+        setUserCount((prev) => prev + 1);
+        setLastRefresh(new Date().toLocaleTimeString("fa-IR"));
+        toast.info("داشبورد به‌روزرسانی شد — کاربر جدید شناسایی شد");
+      }
+    },
+    []
+  );
+
+  /** Listen for NOTIFY events too */
+  const handleNotify = useCallback(
+    (payload: { message: string; type?: string }) => {
+      toast(payload.message, { description: "از پنجره دیگر" });
+    },
+    []
+  );
+
+  useEventBus("REFRESH_DATA", handleRefresh);
+  useEventBus("NOTIFY", handleNotify);
+
+  const stats = [
+    { label: "کل کاربران", value: userCount.toLocaleString("fa-IR"), icon: Users, color: "bg-blue-500/20 text-blue-400" },
+    { label: "فروش امروز", value: "۸,۲۳۰,۰۰۰", icon: ShoppingCart, color: "bg-green-500/20 text-green-400" },
+    { label: "درآمد ماه", value: "۱۲۵,۰۰۰,۰۰۰", icon: DollarSign, color: "bg-purple-500/20 text-purple-400" },
+    { label: "بازدید لحظه‌ای", value: "۱,۲۳۴", icon: Activity, color: "bg-orange-500/20 text-orange-400" },
+  ];
+
   return (
     <div className="p-6 space-y-6 h-full overflow-auto" dir="rtl">
-      <div className="flex items-center gap-3 mb-6">
-        <LayoutDashboard className="w-6 h-6 text-desktop-accent" />
-        <h2 className="text-xl font-bold">داشبورد مدیریت</h2>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <LayoutDashboard className="w-6 h-6 text-desktop-accent" />
+          <h2 className="text-xl font-bold">داشبورد مدیریت</h2>
+        </div>
+        {lastRefresh && (
+          <span className="text-xs text-desktop-text-muted flex items-center gap-1.5">
+            <RefreshCw className="w-3 h-3" />
+            آخرین به‌روزرسانی: {lastRefresh}
+          </span>
+        )}
       </div>
 
       {/* Stats grid */}

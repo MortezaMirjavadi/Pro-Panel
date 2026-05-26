@@ -69,6 +69,7 @@ export const menuData: MenuItem[] = [
         id: "users-roles",
         title: "نقش‌ها و دسترسی‌ها",
         icon: Shield,
+        allowedRoles: ["ADMIN"],
         children: [
           {
             id: "users-roles-admin",
@@ -120,6 +121,7 @@ export const menuData: MenuItem[] = [
         title: "افزودن کاربر",
         icon: UserPlus,
         componentName: "Users",
+        allowedRoles: ["ADMIN", "EDITOR"],
       },
     ],
   },
@@ -298,6 +300,7 @@ export const menuData: MenuItem[] = [
         id: "settings-security",
         title: "امنیت",
         icon: Shield,
+        allowedRoles: ["ADMIN"],
         children: [
           {
             id: "security-2fa",
@@ -398,6 +401,7 @@ export const menuData: MenuItem[] = [
     id: "infra",
     title: "زیرساخت",
     icon: Server,
+    allowedRoles: ["ADMIN"],
     children: [
       {
         id: "infra-servers",

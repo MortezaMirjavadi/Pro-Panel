@@ -17,6 +17,9 @@ A modern MDI (Multiple Document Interface) admin panel that simulates a desktop 
 | Command Palette | cmdk |
 | Keyboard Shortcuts | react-hotkeys-hook |
 | Toast Notifications | sonner |
+| Error Boundaries | react-error-boundary |
+| Inter-Window Events | mitt |
+| Context Menus | @radix-ui/react-context-menu |
 
 ## Features
 
@@ -127,6 +130,73 @@ Global hotkeys that work across the entire application:
 | `Alt+D` | Toggle Show Desktop |
 | `Escape` | Close command palette |
 
+### Window-Level Error Boundaries (react-error-boundary)
+
+Each floating window is wrapped with its own `<ErrorBoundary>`. If a specific app crashes, only that window displays the error fallback — the rest of the Web Desktop stays fully functional.
+
+- **Isolated errors** — a crash in Dashboard doesn't affect Users, Settings, or any other window.
+- **Error fallback UI** — shows an alert icon, the error message in a monospace code block, and a "تلاش مجدد" (Try Again) button that resets the boundary.
+- **Retry** — clicking "Try Again" unmounts and remounts the crashed component, giving it a fresh start.
+
+### Inter-Window Communication (mitt Event Bus)
+
+A typed event bus powered by `mitt` enables isolated floating windows to communicate with each other.
+
+- **Typed events** — `REFRESH_DATA`, `NOTIFY`, and `DATA_SYNC` events with strongly typed payloads.
+- **Custom hooks** — `useEventBus(event, handler)` subscribes with automatic cleanup on unmount. `useEmit(event)` returns a stable emit function.
+- **Use case** — Window A adds a user → emits `REFRESH_DATA { target: "users" }` → Window B (Users list) listens and refetches its data.
+
+```ts
+// Emitting from one window
+const emitRefresh = useEmit("REFRESH_DATA");
+emitRefresh({ target: "users" });
+
+// Listening in another window
+useEventBus("REFRESH_DATA", (payload) => {
+  if (payload.target === "users") refetch();
+});
+```
+
+### Role-Based Access Control (RBAC)
+
+A simple but effective RBAC system controls which apps and menu items each user role can access.
+
+- **Roles** — `ADMIN`, `EDITOR`, `VIEWER`. Default is ADMIN for demo purposes.
+- **Auth store** — Zustand store with `login(role)`, `logout()`, `switchRole(role)`, and `hasAccess(allowedRoles)`. Persisted in `localStorage`.
+- **MenuItem integration** — the `MenuItem` type includes an optional `allowedRoles?: string[]` field. Empty/undefined means accessible to all.
+- **Filtered everywhere** — the Miller Columns (App Explorer), Command Palette, and menu tree all filter items by the current user's role before rendering.
+- **Restricted items** (examples):
+  - Users → Roles & Permissions: ADMIN only
+  - Add User: ADMIN + EDITOR
+  - Settings → Security: ADMIN only
+  - Infrastructure: ADMIN only
+  - Terminal app: ADMIN only
+
+### OS-Level Context Menus (Radix UI)
+
+Right-click context menus using `@radix-ui/react-context-menu` with full RTL support.
+
+- **Desktop background** — right-click the main desktop area to access:
+  - "نمایش دسکتاپ" (Show Desktop)
+  - "بستن همه پنجره‌ها" (Close All Windows)
+  - "تغییر والپیپر" (Change Wallpaper) — submenu with 4 gradient presets + default
+- **Taskbar items** — right-click any window's icon in the taskbar to access:
+  - "فوکوس" (Focus) — bring window to front
+  - "حداقل کردن" / "بازگردانی" (Minimize / Restore) — toggle minimize state
+  - "بستن" (Close) — close the window
+- Menus are styled with Tailwind, support RTL direction (`dir="rtl"`), and render at `z-index: 9999` to stay above all windows.
+
+### Responsive Degradation (Mobile)
+
+The application adapts to mobile viewports (< 768px) with a simplified, touch-friendly layout.
+
+- **`useIsMobile` hook** — uses `useSyncExternalStore` for tear-free reactive viewport width detection.
+- **Full-screen windows** — on mobile, `react-rnd` is bypassed. Windows render as `fixed inset-0` modals covering the entire viewport with no drag or resize.
+- **Mobile header** — each window gets a simplified header with a back arrow (→) and the window title centered. Only the close action is available.
+- **Hidden chrome** — the Sidebar, Taskbar, and desktop background pattern are hidden on mobile to maximize content area.
+- **Mobile app launcher** — when no windows are open on mobile, a grid of app buttons is shown for easy touch access.
+- **Toast position** — notifications move from bottom-left (desktop) to top-center (mobile).
+
 ### RTL (Right-to-Left) Layout
 
 The entire application is built RTL-first.
@@ -188,16 +258,25 @@ pro-panel/
     │   └── globals.css            # Tailwind directives + cmdk/scrollbar styles
     ├── store/
     │   ├── types.ts               # WindowType, OpenWindowParams interfaces
-    │   ├── useWindowStore.ts      # Zustand store with all window actions
+    │   ├── useWindowStore.ts      # Zustand store with all window actions (persisted)
+    │   ├── authStore.ts           # Auth store with roles (ADMIN/EDITOR/VIEWER), persisted
     │   └── index.ts               # Barrel export
+    ├── lib/
+    │   ├── eventBus.ts            # mitt event bus with typed events
+    │   ├── useEventBus.ts         # useEventBus + useEmit hooks
+    │   ├── rbac.ts                # filterMenuByRole() + flattenFilteredTerminalItems()
+    │   └── useIsMobile.ts         # useIsMobile() viewport width hook
     ├── components/
-    │   ├── registry.ts            # Component registry + window definitions
-    │   ├── DynamicWindow.tsx      # react-rnd wrapper (drag, resize, snap, pop-out, focus)
+    │   ├── registry.ts            # Component registry + window definitions (with RBAC)
+    │   ├── DynamicWindow.tsx      # react-rnd wrapper (snap, pop-out, error boundary, mobile)
     │   ├── Sidebar.tsx            # Collapsible RTL navigation sidebar
-    │   ├── Taskbar.tsx            # Bottom taskbar (Show Desktop, Close All)
-    │   ├── CommandPalette.tsx     # cmdk overlay (Open Windows + Available Apps groups)
+    │   ├── Taskbar.tsx            # Bottom taskbar (Show Desktop, Close All, context menu)
+    │   ├── CommandPalette.tsx     # cmdk overlay (filtered by role)
     │   ├── GlobalShortcuts.tsx    # react-hotkeys-hook global keyboard shortcuts
-    │   └── WindowSkeleton.tsx     # Shimmering skeleton for Suspense fallback
+    │   ├── WindowSkeleton.tsx     # Shimmering skeleton for Suspense fallback
+    │   ├── WindowErrorFallback.tsx # Error boundary fallback with retry button
+    │   ├── DesktopContextMenu.tsx # Radix right-click menu (wallpaper, show desktop, close all)
+    │   └── TaskbarContextMenu.tsx # Radix right-click menu per taskbar item
     ├── explorer/
     │   ├── types.ts               # MenuItem recursive type + MillerColumn type
     │   ├── menuData.ts            # 4-level deep mock menu tree + flattenTerminalItems()

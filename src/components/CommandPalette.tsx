@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Command } from "cmdk";
 import {
   LayoutDashboard,
@@ -14,6 +15,7 @@ import {
   FolderTree,
 } from "lucide-react";
 import { useWindowStore } from "../store";
+import { useAuthStore } from "../store/authStore";
 import { windowDefinitions } from "./registry";
 
 const iconMap: Record<string, React.ElementType> = {
@@ -31,8 +33,15 @@ const iconMap: Record<string, React.ElementType> = {
 export default function CommandPalette() {
   const { isPaletteOpen, setPaletteOpen, windows, focusWindow, restoreWindow, openWindow } =
     useWindowStore();
+  const hasAccess = useAuthStore((s) => s.hasAccess);
 
   const openWindows = Object.values(windows);
+
+  /** Filter available apps by the current user's role */
+  const accessibleApps = useMemo(
+    () => windowDefinitions.filter((def) => hasAccess((def as Record<string, unknown>).allowedRoles as string[] | undefined)),
+    [hasAccess]
+  );
 
   /** Select an already-open window from the palette */
   const handleSelectWindow = (windowId: string) => {
@@ -107,9 +116,9 @@ export default function CommandPalette() {
 
             <Command.Separator />
 
-            {/* ── Group 2: Available Apps ── */}
+            {/* ── Group 2: Available Apps (filtered by role) ── */}
             <Command.Group heading="برنامه‌های موجود">
-              {windowDefinitions.map((def) => {
+              {accessibleApps.map((def) => {
                 const Icon = iconMap[def.icon] ?? LayoutDashboard;
                 const isOpen = !!windows[def.id];
                 return (

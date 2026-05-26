@@ -13,6 +13,7 @@ import {
   FolderTree,
 } from "lucide-react";
 import { useWindowStore } from "../store";
+import TaskbarContextMenu from "./TaskbarContextMenu";
 
 const iconMap: Record<string, React.ElementType> = {
   LayoutDashboard,
@@ -41,30 +42,36 @@ export default function Taskbar() {
         const isActive = activeWindowId === win.id && !win.isMinimized;
 
         return (
-          <button
+          <TaskbarContextMenu
             key={win.id}
-            onClick={() => {
-              if (win.isMinimized) {
-                restoreWindow(win.id);
-              } else if (isActive) {
-                minimizeWindow(win.id);
-              } else {
-                focusWindow(win.id);
-              }
-            }}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all max-w-[180px] ${
-              isActive
-                ? "bg-desktop-accent text-white"
-                : "bg-desktop-surface/50 text-desktop-text-muted hover:bg-desktop-surface hover:text-desktop-text"
-            } ${win.isMinimized ? "opacity-60" : ""}`}
-            title={win.title}
+            windowId={win.id}
+            isMinimized={win.isMinimized}
+            isActive={isActive}
           >
-            <Icon className="w-4 h-4 shrink-0" />
-            <span className="truncate">{win.title}</span>
-            {win.isMinimized && (
-              <Minimize2 className="w-3 h-3 shrink-0 opacity-50" />
-            )}
-          </button>
+            <button
+              onClick={() => {
+                if (win.isMinimized) {
+                  restoreWindow(win.id);
+                } else if (isActive) {
+                  minimizeWindow(win.id);
+                } else {
+                  focusWindow(win.id);
+                }
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-all max-w-[180px] ${
+                isActive
+                  ? "bg-desktop-accent text-white"
+                  : "bg-desktop-surface/50 text-desktop-text-muted hover:bg-desktop-surface hover:text-desktop-text"
+              } ${win.isMinimized ? "opacity-60" : ""}`}
+              title={win.title}
+            >
+              <Icon className="w-4 h-4 shrink-0" />
+              <span className="truncate">{win.title}</span>
+              {win.isMinimized && (
+                <Minimize2 className="w-3 h-3 shrink-0 opacity-50" />
+              )}
+            </button>
+          </TaskbarContextMenu>
         );
       })}
 
