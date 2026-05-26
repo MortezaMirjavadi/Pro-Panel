@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar for the desktop theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #252641;
+}
+::-webkit-scrollbar-thumb {
+  background: #363858;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6c5ce7;
+}
+
+/* cmdk overrides */
+[cmdk-root] {
+  width: 100%;
+  max-width: 560px;
+  background: #252641;
+  border: 1px solid #363858;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+[cmdk-input] {
+  width: 100%;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #363858;
+  color: #e4e6f0;
+  font-size: 15px;
+  outline: none;
+  direction: rtl;
+}
+
+[cmdk-input]::placeholder {
+  color: #8b8da8;
+}
+
+[cmdk-list] {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+[cmdk-item] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #e4e6f0;
+  font-size: 14px;
+  direction: rtl;
+}
+
+[cmdk-item][data-selected="true"] {
+  background: #6c5ce7;
+  color: #fff;
+}
+
+[cmdk-item]:hover {
+  background: #363858;
+}
+
+[cmdk-empty] {
+  padding: 20px;
+  text-align: center;
+  color: #8b8da8;
+  font-size: 14px;
+}
+
+[cmdk-separator] {
+  height: 1px;
+  background: #363858;
+  margin: 4px 0;
+}
+
+[cmdk-group-heading] {
+  padding: 8px 12px 4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8b8da8;
+  direction: rtl;
+}
