@@ -1,19 +1,19 @@
 import { Suspense } from "react";
 import ReactDOM from "react-dom/client";
-import { componentRegistry } from "./components/registry";
+import { featureRegistry } from "./lib/FeatureRegistry";
 import WindowSkeleton from "./components/WindowSkeleton";
 import "./styles/globals.css";
 
 /**
  * Standalone popout page entry point.
- * Reads the component name from URL params: /popout.html?component=Dashboard
+ * Reads the component name from URL params: /popout.html?component=dashboard
  * Renders the component in a minimal full-page wrapper.
  */
 function PopoutApp() {
   const params = new URLSearchParams(window.location.search);
-  const componentName = params.get("component");
+  const appId = params.get("component");
 
-  if (!componentName) {
+  if (!appId) {
     return (
       <div className="flex items-center justify-center h-screen" dir="rtl">
         <p className="text-desktop-text-muted">نام برنامه مشخص نشده است.</p>
@@ -21,12 +21,12 @@ function PopoutApp() {
     );
   }
 
-  const Component = componentRegistry[componentName];
+  const Component = featureRegistry.getComponent(appId);
 
   if (!Component) {
     return (
       <div className="flex items-center justify-center h-screen" dir="rtl">
-        <p className="text-desktop-text-muted">برنامه "{componentName}" یافت نشد.</p>
+        <p className="text-desktop-text-muted">برنامه "{appId}" یافت نشد.</p>
       </div>
     );
   }

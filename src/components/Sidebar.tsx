@@ -1,41 +1,13 @@
 import { useState } from "react";
-import {
-  LayoutDashboard,
-  Users,
-  Settings,
-  BarChart3,
-  FolderOpen,
-  MessageSquare,
-  Calendar,
-  Terminal,
-  ChevronLeft,
-  ChevronRight,
-  Search,
-  FolderTree,
-  Palette,
-  Table,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Search, LayoutDashboard } from "lucide-react";
 import { useWindowStore } from "../store";
-import { windowDefinitions } from "./registry";
-
-/** Map icon string names to Lucide components */
-const iconMap: Record<string, React.ElementType> = {
-  LayoutDashboard,
-  Users,
-  Settings,
-  BarChart3,
-  FolderOpen,
-  MessageSquare,
-  Calendar,
-  Terminal,
-  FolderTree,
-  Palette,
-  Table,
-};
+import { featureRegistry } from "../lib/FeatureRegistry";
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { openWindow, setPaletteOpen } = useWindowStore();
+
+  const apps = featureRegistry.getAll();
 
   return (
     <aside
@@ -77,27 +49,26 @@ export default function Sidebar() {
 
       {/* Navigation items */}
       <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
-        {windowDefinitions.map((def) => {
-          const Icon = iconMap[def.icon] ?? LayoutDashboard;
+        {apps.map((app) => {
+          const Icon = app.icon ?? LayoutDashboard;
           return (
             <button
-              key={def.id}
+              key={app.id}
               onClick={() =>
                 openWindow({
-                  id: def.id,
-                  title: def.title,
-                  componentName: def.componentName,
-                  icon: def.icon,
+                  id: app.id,
+                  title: app.title,
+                  componentName: app.id,
                 })
               }
               className={`flex items-center gap-3 w-full rounded-lg transition-colors hover:bg-desktop-border/50 ${
                 collapsed ? "justify-center p-3" : "px-3 py-2.5"
               }`}
-              title={def.title}
+              title={app.title}
             >
               <Icon className="w-5 h-5 text-desktop-text-muted shrink-0" />
               {!collapsed && (
-                <span className="text-sm text-desktop-text truncate">{def.title}</span>
+                <span className="text-sm text-desktop-text truncate">{app.title}</span>
               )}
             </button>
           );

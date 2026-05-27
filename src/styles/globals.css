@@ -270,6 +270,15 @@
   background: var(--color-scrollbar-thumb-hover);
 }
 
+/* ── Scrollbar hide (scrollable but no visible bar) ── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* ── AG Grid theme overrides (ensures filter menus & popups match) ── */
 .ag-theme-quartz {
   --ag-background-color: var(--color-bg);

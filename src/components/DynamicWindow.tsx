@@ -3,7 +3,7 @@ import { Rnd } from "react-rnd";
 import { Minus, Square, X, Copy, ExternalLink, ArrowRight } from "lucide-react";
 import { ErrorBoundary } from "react-error-boundary";
 import { useWindowStore } from "../store";
-import { componentRegistry } from "./registry";
+import { featureRegistry } from "../lib/FeatureRegistry";
 import WindowSkeleton from "./WindowSkeleton";
 import WindowErrorFallback from "./WindowErrorFallback";
 import { useIsMobile } from "../lib/useIsMobile";
@@ -19,7 +19,7 @@ const SNAP_THRESHOLD = 20;
 
 /** Shared window body content (ErrorBoundary + Suspense + Component) */
 function WindowBody({ componentName }: { componentName: string }) {
-  const Component = componentRegistry[componentName];
+  const Component = featureRegistry.getComponent(componentName);
   if (!Component) return null;
 
   return (
@@ -46,7 +46,7 @@ export default function DynamicWindow({ window: win }: DynamicWindowProps) {
 
   const isMobile = useIsMobile();
   const isActive = activeWindowId === win.id;
-  const Component = componentRegistry[win.componentName];
+  const Component = featureRegistry.getComponent(win.componentName);
 
   /** Track pre-snap size during a drag operation */
   const preSnapSizeRef = useRef<WindowSize | null>(win.preSnapSize ?? null);

@@ -21,8 +21,6 @@ export interface WindowType {
   zIndex: number;
   position: WindowPosition;
   size: WindowSize;
-  /** Icon component name from lucide-react (optional) */
-  icon?: string;
   /** Saved size before snapping, so we can restore on drag-away */
   preSnapSize?: WindowSize | null;
 }
@@ -32,7 +30,6 @@ export interface OpenWindowParams {
   id: string;
   title: string;
   componentName: string;
-  icon?: string;
   position?: WindowPosition;
   size?: WindowSize;
 }

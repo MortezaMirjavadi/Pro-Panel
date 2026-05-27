@@ -25,6 +25,8 @@ interface WindowStore {
   wallpaper: string;
   /** Pinned/favorite app IDs (persisted) */
   pinnedApps: string[];
+  /** Windows with unsaved changes (not persisted — runtime only) */
+  unsavedWindows: Record<string, boolean>;
 
   // Actions
   openWindow: (params: OpenWindowParams) => void;
@@ -44,6 +46,9 @@ interface WindowStore {
   setTheme: (themeId: string) => void;
   setWallpaper: (url: string) => void;
   togglePin: (appId: string) => void;
+  markWindowDirty: (id: string) => void;
+  markWindowClean: (id: string) => void;
+  hasUnsavedChanges: () => boolean;
 }
 
 /** Calculate a cascading position based on how many windows are open */
@@ -65,6 +70,7 @@ export const useWindowStore = create<WindowStore>()(
       theme: "midnight",
       wallpaper: "",
       pinnedApps: [],
+      unsavedWindows: {},
 
       openWindow: (params: OpenWindowParams) => {
         const { windows, topZIndex } = get();
@@ -102,26 +108,40 @@ export const useWindowStore = create<WindowStore>()(
           zIndex: topZIndex + 1,
           position,
           size,
-          icon: params.icon,
           preSnapSize: null,
         };
 
-        set((state) => ({
-          windows: { ...state.windows, [params.id]: newWindow },
-          topZIndex: state.topZIndex + 1,
-          activeWindowId: params.id,
-          showDesktop: false,
-        }));
+        set((state) => {
+          const { [params.id]: _dirty, ...restDirty } = state.unsavedWindows;
+          return {
+            windows: { ...state.windows, [params.id]: newWindow },
+            unsavedWindows: restDirty,
+            topZIndex: state.topZIndex + 1,
+            activeWindowId: params.id,
+            showDesktop: false,
+          };
+        });
       },
 
       closeWindow: (id: string) => {
+        // Guard: prompt if window has unsaved changes
+        if (get().unsavedWindows[id]) {
+          const win = get().windows[id];
+          const title = win?.title ?? "این پنجره";
+          const confirmed = window.confirm(
+            `پنجره "${title}" تغییرات ذخیره نشده دارد. آیا مطمئنید می‌خواهید ببندید؟`
+          );
+          if (!confirmed) return;
+        }
+
         set((state) => {
           const { [id]: _removed, ...rest } = state.windows;
+          const { [id]: _dirty, ...restDirty } = state.unsavedWindows;
           const newActive =
             state.activeWindowId === id
               ? Object.values(rest).sort((a, b) => b.zIndex - a.zIndex)[0]?.id ?? null
               : state.activeWindowId;
-          return { windows: rest, activeWindowId: newActive };
+          return { windows: rest, unsavedWindows: restDirty, activeWindowId: newActive };
         });
       },
 
@@ -206,7 +226,7 @@ export const useWindowStore = create<WindowStore>()(
       },
 
       closeAllWindows: () => {
-        set({ windows: {}, activeWindowId: null, showDesktop: false });
+        set({ windows: {}, unsavedWindows: {}, activeWindowId: null, showDesktop: false });
       },
 
       /** Minimize all windows and enter "Show Desktop" mode */
@@ -268,6 +288,23 @@ export const useWindowStore = create<WindowStore>()(
               : [...state.pinnedApps, appId],
           };
         });
+      },
+
+      markWindowDirty: (id: string) => {
+        set((state) => ({
+          unsavedWindows: { ...state.unsavedWindows, [id]: true },
+        }));
+      },
+
+      markWindowClean: (id: string) => {
+        set((state) => {
+          const { [id]: _removed, ...rest } = state.unsavedWindows;
+          return { unsavedWindows: rest };
+        });
+      },
+
+      hasUnsavedChanges: () => {
+        return Object.keys(get().unsavedWindows).length > 0;
       },
     }),
     {

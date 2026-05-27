@@ -1,38 +1,9 @@
 import { useMemo } from "react";
 import { Command } from "cmdk";
-import {
-  LayoutDashboard,
-  Users,
-  Settings,
-  BarChart3,
-  FolderOpen,
-  MessageSquare,
-  Calendar,
-  Terminal,
-  X,
-  AppWindow,
-  Grid3x3,
-  FolderTree,
-  Palette,
-  Table,
-} from "lucide-react";
+import { X, AppWindow, Grid3x3, LayoutDashboard } from "lucide-react";
 import { useWindowStore } from "../store";
 import { useAuthStore } from "../store/authStore";
-import { windowDefinitions } from "./registry";
-
-const iconMap: Record<string, React.ElementType> = {
-  LayoutDashboard,
-  Users,
-  Settings,
-  BarChart3,
-  FolderOpen,
-  MessageSquare,
-  Calendar,
-  Terminal,
-  FolderTree,
-  Palette,
-  Table,
-};
+import { featureRegistry } from "../lib/FeatureRegistry";
 
 export default function CommandPalette() {
   const { isPaletteOpen, setPaletteOpen, windows, focusWindow, restoreWindow, openWindow } =
@@ -43,7 +14,7 @@ export default function CommandPalette() {
 
   /** Filter available apps by the current user's role */
   const accessibleApps = useMemo(
-    () => windowDefinitions.filter((def) => hasAccess((def as Record<string, unknown>).allowedRoles as string[] | undefined)),
+    () => featureRegistry.getByAccess(hasAccess),
     [hasAccess]
   );
 
@@ -60,15 +31,14 @@ export default function CommandPalette() {
   };
 
   /** Open a new window from the "Available Apps" group */
-  const handleOpenApp = (componentName: string) => {
-    const def = windowDefinitions.find((d) => d.componentName === componentName);
-    if (!def) return;
+  const handleOpenApp = (appId: string) => {
+    const app = featureRegistry.get(appId);
+    if (!app) return;
 
     openWindow({
-      id: def.id,
-      title: def.title,
-      componentName: def.componentName,
-      icon: def.icon,
+      id: app.id,
+      title: app.title,
+      componentName: app.id,
     });
     setPaletteOpen(false);
   };
@@ -97,9 +67,7 @@ export default function CommandPalette() {
             {/* ── Group 1: Open Windows ── */}
             {openWindows.length > 0 && (
               <Command.Group heading="پنجره‌های باز">
-                {openWindows.map((win) => {
-                  const Icon = iconMap[win.icon ?? ""] ?? LayoutDashboard;
-                  return (
+                {openWindows.map((win) => (
                     <Command.Item
                       key={`open-${win.id}`}
                       value={`open ${win.title} ${win.componentName}`}
@@ -113,8 +81,7 @@ export default function CommandPalette() {
                         </span>
                       )}
                     </Command.Item>
-                  );
-                })}
+                  ))}
               </Command.Group>
             )}
 
@@ -122,18 +89,18 @@ export default function CommandPalette() {
 
             {/* ── Group 2: Available Apps (filtered by role) ── */}
             <Command.Group heading="برنامه‌های موجود">
-              {accessibleApps.map((def) => {
-                const Icon = iconMap[def.icon] ?? LayoutDashboard;
-                const isOpen = !!windows[def.id];
+              {accessibleApps.map((app) => {
+                const Icon = app.icon ?? LayoutDashboard;
+                const isOpen = !!windows[app.id];
                 return (
                   <Command.Item
-                    key={`app-${def.id}`}
-                    value={`app ${def.title} ${def.componentName}`}
-                    onSelect={() => handleOpenApp(def.componentName)}
+                    key={`app-${app.id}`}
+                    value={`app ${app.title} ${app.id}`}
+                    onSelect={() => handleOpenApp(app.id)}
                   >
                     <Grid3x3 className="w-4 h-4 text-desktop-text-muted" />
                     <Icon className="w-4 h-4 text-desktop-accent" />
-                    <span className="flex-1">{def.title}</span>
+                    <span className="flex-1">{app.title}</span>
                     {isOpen && (
                       <span className="text-xs text-green-400 bg-green-500/15 px-2 py-0.5 rounded">
                         باز

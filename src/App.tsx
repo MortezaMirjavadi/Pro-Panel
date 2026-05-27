@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { useWindowStore } from "./store";
 import Sidebar from "./components/Sidebar";
+import Header from "./components/Header";
 import Taskbar from "./components/Taskbar";
 import DynamicWindow from "./components/DynamicWindow";
 import CommandPalette from "./components/CommandPalette";
@@ -9,9 +11,20 @@ import { useIsMobile } from "./lib/useIsMobile";
 import { Toaster } from "sonner";
 
 export default function App() {
-  const { windows, theme, wallpaper } = useWindowStore();
+  const { windows, theme, wallpaper, hasUnsavedChanges } = useWindowStore();
   const allWindows = Object.values(windows);
   const isMobile = useIsMobile();
+
+  // Warn before browser tab close/refresh if any window has unsaved changes
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges()) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasUnsavedChanges]);
 
   return (
     <div
@@ -19,6 +32,9 @@ export default function App() {
       data-theme={theme}
       className="h-screen w-screen flex flex-col overflow-hidden select-none bg-desktop-bg text-desktop-text"
     >
+      {/* ── Top Header Bar ── */}
+      {!isMobile && <Header />}
+
       {/* ── Main Content Area ── */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar — hidden on mobile */}
