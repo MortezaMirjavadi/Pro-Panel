@@ -12,6 +12,7 @@ import {
   Monitor,
   FolderTree,
   Palette,
+  Table,
 } from "lucide-react";
 import { useWindowStore } from "../store";
 import TaskbarContextMenu from "./TaskbarContextMenu";
@@ -27,6 +28,7 @@ const iconMap: Record<string, React.ElementType> = {
   Terminal,
   FolderTree,
   Palette,
+  Table,
 };
 
 export default function Taskbar() {

@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@radix-ui/react-context-menu": "^2.2.16",
+    "ag-grid-community": "^35.3.0",
+    "ag-grid-react": "^35.3.0",
     "cmdk": "^1.0.4",
     "lucide-react": "^0.468.0",
     "mitt": "^3.0.1",

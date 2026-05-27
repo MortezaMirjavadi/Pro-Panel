@@ -13,6 +13,7 @@ import {
   Search,
   FolderTree,
   Palette,
+  Table,
 } from "lucide-react";
 import { useWindowStore } from "../store";
 import { windowDefinitions } from "./registry";
@@ -29,6 +30,7 @@ const iconMap: Record<string, React.ElementType> = {
   Terminal,
   FolderTree,
   Palette,
+  Table,
 };
 
 export default function Sidebar() {

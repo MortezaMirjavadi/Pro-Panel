@@ -1,6 +1,34 @@
+/* ── AG Grid base styles ── */
+@import "ag-grid-community/styles/ag-grid.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── IRANSansXFaNum Font ── */
+@font-face {
+  font-family: "IRANSansXFaNum";
+  src: url("https://web-cdn.snapp.ir/shared/fonts/fa/IRANSansXFaNum-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IRANSansXFaNum";
+  src: url("https://web-cdn.snapp.ir/shared/fonts/fa/IRANSansXFaNum-medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Global Font ── */
+*,
+*::before,
+*::after {
+  font-family: "IRANSansXFaNum", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
 
 /* ── Theme CSS Variables (default: midnight) ── */
 [data-theme="midnight"] {
@@ -240,4 +268,166 @@
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: var(--color-scrollbar-thumb-hover);
+}
+
+/* ── AG Grid theme overrides (ensures filter menus & popups match) ── */
+.ag-theme-quartz {
+  --ag-background-color: var(--color-bg);
+  --ag-foreground-color: var(--color-text);
+  --ag-border-color: var(--color-border);
+  --ag-header-background-color: var(--color-surface);
+  --ag-header-foreground-color: var(--color-text);
+  --ag-secondary-foreground-color: var(--color-text-muted);
+  --ag-icon-color: var(--color-text-muted);
+  --ag-input-border-color: var(--color-border);
+  --ag-input-background-color: var(--color-surface);
+  --ag-checkbox-checked-color: var(--color-accent);
+  --ag-alpine-active-color: var(--color-accent);
+  --ag-odd-row-background-color: var(--color-surface);
+}
+
+/* AG Grid header — force override inline styles */
+.ag-theme-quartz .ag-header,
+.ag-theme-quartz .ag-header-container,
+.ag-theme-quartz .ag-header-row {
+  background: var(--color-surface) !important;
+}
+
+.ag-theme-quartz .ag-header-cell,
+.ag-theme-quartz .ag-header-cell-label {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+}
+
+.ag-theme-quartz .ag-header-cell::after {
+  background-color: var(--color-border) !important;
+}
+
+/* AG Grid body cells */
+.ag-theme-quartz .ag-cell,
+.ag-theme-quartz .ag-row {
+  color: var(--color-text) !important;
+}
+
+.ag-theme-quartz .ag-row-even {
+  background: var(--color-bg) !important;
+}
+
+.ag-theme-quartz .ag-row-odd {
+  background: color-mix(in srgb, var(--color-surface) 60%, var(--color-bg)) !important;
+}
+
+.ag-theme-quartz .ag-row:hover {
+  background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg)) !important;
+  color: var(--color-text) !important;
+}
+
+/* Selected row — bright highlight with accent */
+.ag-theme-quartz .ag-row-selected {
+  background: color-mix(in srgb, var(--color-accent) 35%, var(--color-bg)) !important;
+  color: var(--color-text) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+.ag-theme-quartz .ag-row-selected:hover {
+  background: color-mix(in srgb, var(--color-accent) 45%, var(--color-bg)) !important;
+}
+
+.ag-theme-quartz .ag-row-selected::before {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--color-accent);
+  border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+
+/* AG Grid column borders */
+.ag-theme-quartz .ag-cell,
+.ag-theme-quartz .ag-header-cell {
+  border-color: var(--color-border) !important;
+}
+
+/* AG Grid filter popup / menu styling */
+.ag-theme-quartz .ag-popup-child {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text) !important;
+}
+
+.ag-theme-quartz .ag-filter-body,
+.ag-theme-quartz .ag-filter-toolpanel-body {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+}
+
+.ag-theme-quartz .ag-filter-body input,
+.ag-theme-quartz .ag-filter-body select,
+.ag-theme-quartz .ag-filter-body textarea {
+  background: var(--color-bg) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+
+.ag-theme-quartz .ag-list-item,
+.ag-theme-quartz .ag-filter-apply-panel button,
+.ag-theme-quartz .ag-picker-field-wrapper {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+
+.ag-theme-quartz .ag-list-item:hover,
+.ag-theme-quartz .ag-list-item.ag-active-item {
+  background: var(--color-accent) !important;
+  color: #fff !important;
+}
+
+.ag-theme-quartz .ag-panel-title-bar-button,
+.ag-theme-quartz .ag-icon {
+  color: var(--color-text-muted) !important;
+}
+
+/* AG Grid pagination */
+.ag-theme-quartz .ag-paging-panel {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+  border-top-color: var(--color-border) !important;
+}
+
+.ag-theme-quartz .ag-paging-panel * {
+  color: var(--color-text) !important;
+}
+
+.ag-theme-quartz .ag-paging-button {
+  color: var(--color-text) !important;
+  background: transparent !important;
+}
+
+.ag-theme-quartz .ag-paging-button:hover {
+  background: var(--color-accent) !important;
+  color: #fff !important;
+}
+
+.ag-theme-quartz .ag-paging-row-summary-panel {
+  color: var(--color-text-muted) !important;
+}
+
+/* AG Grid wrapper border */
+.ag-theme-quartz .ag-root-wrapper {
+  border-color: var(--color-border) !important;
+}
+
+/* Checkbox styling */
+.ag-theme-quartz .ag-checkbox-input-wrapper {
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+}
+
+.ag-theme-quartz .ag-checkbox-input-wrapper.ag-checked {
+  background: var(--color-accent) !important;
+  border-color: var(--color-accent) !important;
 }
